@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.DriveFocus" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.DriveFocus.Splash" parent="Theme.SplashScreen">
+        <!-- Splash background -->
+        <item name="windowSplashScreenBackground">@color/black</item>
+
+        <!-- App icon (center) -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+
+        <!-- After splash → app theme -->
+        <item name="postSplashScreenTheme">@style/Theme.DriveFocus</item>
+    </style>
+</resources>
