@@ -28,9 +28,6 @@ private const val KEY_IS_SERVICE_RUNNING = "is_service_running"
 class HomeViewModel @Inject constructor(
     application: Application
 ) : AndroidViewModel(application) {
-    private val _isActive = MutableStateFlow(false)
-    val isActive: StateFlow<Boolean> = _isActive
-
     private val _isServiceRunning = MutableStateFlow(false)
     val isServiceRunning: StateFlow<Boolean> = _isServiceRunning.asStateFlow()
 
@@ -40,7 +37,6 @@ class HomeViewModel @Inject constructor(
     private val prefs: SharedPreferences =
         application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    // ★ 3. CREATE a listener for SharedPreferences changes ★
     private val preferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             if (key == KEY_IS_SERVICE_RUNNING) {
@@ -61,39 +57,18 @@ class HomeViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        // Unregister listener to prevent memory leaks
         prefs.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
     }
 
     fun checkDefaultCallerIdStatus() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val app = getApplication<Application>()
-            // ★ 1. USE RoleManager INSTEAD OF TelecomManager ★
             val roleManager = app.getSystemService(Context.ROLE_SERVICE) as RoleManager
-            // ★ 2. CHECK FOR THE CORRECT ROLE: ROLE_CALL_SCREENING ★
             val isRoleHeld = roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)
             _isDefaultCallerIdApp.value = isRoleHeld
         } else {
             // On older versions, this role doesn't exist, so we can consider it "true"
             _isDefaultCallerIdApp.value = true
         }
-    }
-    private val _actions = MutableSharedFlow<DriveFocusAction>()
-    val actions = _actions.asSharedFlow()
-
-    fun toggleActive() {
-        val newValue = !_isActive.value
-        _isActive.value = newValue
-
-        viewModelScope.launch {
-            _actions.emit(
-                if (newValue) DriveFocusAction.Start
-                else DriveFocusAction.Stop
-            )
-        }
-    }
-
-    fun setActive( value: Boolean ){
-        _isActive.value = value
     }
 }

@@ -23,7 +23,6 @@ class DriveFocusService : Service() {
 
     companion object {
         const val ACTION_STOP_SERVICE = "com.example.drivefocus.ACTION_STOP_SERVICE"
-        // ACTION_SEND_SMS and EXTRA_PHONE_NUMBER are no longer needed here
     }
 
     // State for driving detection
@@ -36,7 +35,6 @@ class DriveFocusService : Service() {
     // State for emergency call override
     private var lowSpeedUpdates = 0
     private val REQUIRED_LOW_SPEED_UPDATES = 3
-    private val EMERGENCY_TIME_WINDOW_MS = 60 * 1000 // 1 minute
 
     private val locationCallback = object : com.google.android.gms.location.LocationCallback() {
         override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
@@ -47,7 +45,6 @@ class DriveFocusService : Service() {
 //            Log.d("DriveFocusService", "FORCING isDriving = true for testing.")
 
             locationResult.lastLocation?.let { location ->
-                // Your robust driving detection logic
                 if (location.speed > DRIVING_SPEED_THRESHOLD_MPS) {
                     highSpeedUpdates++
                     lowSpeedUpdates = 0
@@ -62,7 +59,6 @@ class DriveFocusService : Service() {
                     }
                 }
 
-                // Write the current driving state to SharedPreferences
                 val prefs = applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 prefs.edit().putBoolean(KEY_IS_DRIVING, isDriving).apply()
 
@@ -76,8 +72,6 @@ class DriveFocusService : Service() {
         fusedLocationClient = com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(this)
     }
 
-// In DriveFocusService.kt
-
     @SuppressLint("MissingPermission")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Only check for the stop action
@@ -89,13 +83,11 @@ class DriveFocusService : Service() {
             return START_NOT_STICKY
         }
 
-        // This is now only for the initial start of the service from the UI
         try {
             createNotificationChannel()
             val notification = createNotification()
             startForeground(1, notification)
 
-            // Write the service running state to SharedPreferences
             val prefs = applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit().putBoolean(KEY_IS_SERVICE_RUNNING, true).apply()
 
@@ -109,7 +101,7 @@ class DriveFocusService : Service() {
     }
 
     @SuppressLint("MissingPermission") // We check for permissions before starting service
-    private fun startLocationUpdates() {        // Use the correct builder pattern from Google Play Services location API
+    private fun startLocationUpdates() {
         val locationRequest = com.google.android.gms.location.LocationRequest.Builder(
             com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
             5000
@@ -138,8 +130,6 @@ class DriveFocusService : Service() {
     }
 
     private fun createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "DriveFocus Channel"
             val descriptionText = "Notifications for DriveFocus service"
@@ -155,8 +145,6 @@ class DriveFocusService : Service() {
     }
 
     private fun createNotification(): Notification {
-        // You need to provide an icon for the notification.
-        // Replace 'ic_drive_focus_notification' with your actual notification icon in the drawable folder.
         val notification = NotificationCompat.Builder(this, "DRIVEFOCUS_CHANNEL_ID")
             .setContentTitle("DriveFocus is Active")
             .setContentText("Your driving is being monitored.")
@@ -168,7 +156,6 @@ class DriveFocusService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        // We don't provide binding, so return null
         return null
     }
 }

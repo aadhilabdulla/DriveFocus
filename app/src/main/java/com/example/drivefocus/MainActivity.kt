@@ -83,18 +83,15 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    // Collect the state from the ViewModel. This remains the same.
     val isServiceRunning by viewModel.isServiceRunning.collectAsState()
     val isDefaultCallerIdApp by viewModel.isDefaultCallerIdApp.collectAsState()
     val requestRoleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) {
-        // After the user returns from the settings screen, re-check the status
         viewModel.checkDefaultCallerIdStatus()
     }
     val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arrayOf(
-            // Existing
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -106,7 +103,6 @@ fun HomeScreen(
         )
     } else {
         arrayOf(
-            // Existing
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ANSWER_PHONE_CALLS,
@@ -123,7 +119,6 @@ fun HomeScreen(
             if (allGranted) {
                 startService(context)
             }
-            // Optional: Handle the case where permissions are denied
         }
     )
 
@@ -132,7 +127,6 @@ fun HomeScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Here we use your ToggleButton and pass the state to it
         ToggleButton(
             selected = isServiceRunning,
             onUpdate = { selected ->
@@ -145,7 +139,6 @@ fun HomeScreen(
                 }
             }
         )
-        // This button only shows up if the app isn't the default and the service is not running.
         if (!isDefaultCallerIdApp) {
             Spacer(modifier = Modifier.height(24.dp))
             SetAsDefaultButton {
@@ -171,7 +164,6 @@ fun SetAsDefaultButton(onClick: () -> Unit) {
         Text(text = "Set as Call Screening App")
     }
 }
-// Keep your original ToggleButton composable exactly as it was
 @Composable
 fun ToggleButton(
     selected: Boolean,
@@ -180,11 +172,9 @@ fun ToggleButton(
     shape: Shape = CircleShape,
     contentPadding: PaddingValues = PaddingValues(16.dp),
 ) {
-    // 1. Define your custom green color and the "unselected" color
     val selectedColor = Color(0xFF4CAF50)
     val unselectedColor = MaterialTheme.colorScheme.primary
 
-    // 2. Animate the BORDER color between green and the primary theme color
     val animatedBorderColor by animateColorAsState(
         targetValue = if (selected) selectedColor else unselectedColor,
         label = "borderColor"
@@ -196,10 +186,8 @@ fun ToggleButton(
         onClick = { onUpdate(!selected) },
         modifier = modifier.size(size),
         shape = shape,
-        // 3. Apply the animated color to the border here
         border = BorderStroke(2.dp, animatedBorderColor),
         contentPadding = contentPadding,
-        // 4. IMPORTANT: Ensure the container color is always transparent
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = Color.Transparent
         )
@@ -213,7 +201,6 @@ fun ToggleButton(
 
 
 
-// startService and stopService functions remain unchanged
 private fun startService(context: Context) {
     val intent = Intent(context, DriveFocusService::class.java)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -225,9 +212,7 @@ private fun startService(context: Context) {
 
 private fun stopService(context: Context) {
     val intent = Intent(context, DriveFocusService::class.java)
-    // Set the specific action to tell the service to shut down gracefully
     intent.action = DriveFocusService.ACTION_STOP_SERVICE
-    // Use startService to deliver this command to the already-running service
     context.startService(intent)
 }
 

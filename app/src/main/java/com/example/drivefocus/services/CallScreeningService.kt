@@ -23,7 +23,6 @@ class CallScreeningService : CallScreeningService() {
     override fun onScreenCall(callDetails: Call.Details) {
         Log.d("CallScreeningService", "-> onScreenCall TRIGGERED.")
 
-        // 1. READ state ONLY from SharedPreferences
         val prefs = applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val isServiceRunning = prefs.getBoolean(KEY_IS_SERVICE_RUNNING, false)
 
@@ -61,7 +60,6 @@ class CallScreeningService : CallScreeningService() {
         respondToCall(callDetails, response)
         Log.d("CallScreeningService", "-> SUCCEEDED: respondToCall was executed.")
 
-        // 2. SEND THE SMS and SAVE HISTORY from *HERE*
         sendRejectionSms(applicationContext, phoneNumber)
 
         val key = "$KEY_REJECTED_CALL_HISTORY_PREFIX$phoneNumber"
@@ -69,7 +67,6 @@ class CallScreeningService : CallScreeningService() {
         Log.d("CallScreeningService", "-> Saved rejection time for $phoneNumber.")
     }
 
-    // 4. REWRITE the emergency callback to use SharedPreferences
     private fun isEmergencyCallback(context: Context, phoneNumber: String): Boolean {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val key = "$KEY_REJECTED_CALL_HISTORY_PREFIX$phoneNumber"
